@@ -3,6 +3,8 @@
 
 import { expandQuery, scoreEntry } from './search.js';
 
+const RE_SAFE_URL = /^https?:\/\//i;
+
 const state = { entries: [], synonyms: {}, query: '', chip: null, sort: 'recent' };
 
 const $grid = document.getElementById('grid');
@@ -132,9 +134,9 @@ function card(entry, i) {
     <span class="shot-loves">${HEART}${entry.loves ?? 0}</span>`;
   fig.appendChild(meta);
 
-  fig.addEventListener('click', () => openDetail(entry));
+  fig.addEventListener('click', () => openDetail(entry, fig));
   fig.addEventListener('keydown', ev => {
-    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openDetail(entry); }
+    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openDetail(entry, fig); }
   });
 
   return fig;
@@ -142,7 +144,11 @@ function card(entry, i) {
 
 /* ── detail overlay ────────────────────────────────────────── */
 
-function openDetail(entry) {
+let _detailOpener = null;
+
+function openDetail(entry, openerEl) {
+  _detailOpener = openerEl ?? null;
+
   const media = entry.motion
     ? `<video src="${escapeAttr(entry.motion)}" autoplay loop muted playsinline poster="${escapeAttr(entry.asset)}"></video>`
     : `<img src="${escapeAttr(entry.asset)}" alt="${escapeAttr(entry.title)}" />`;
@@ -156,6 +162,11 @@ function openDetail(entry) {
        </div>`
     : '';
 
+  const visitLink = RE_SAFE_URL.test(entry.url)
+    ? `<span class="meta-dot"></span>
+      <a class="detail-visit" href="${escapeAttr(entry.url)}" target="_blank" rel="noopener noreferrer">Visit →</a>`
+    : '';
+
   $detailBody.innerHTML = `
     <div class="detail-media">${media}</div>
     <h2 class="detail-title" id="detail-title">${escapeHtml(entry.title)}</h2>
@@ -166,8 +177,7 @@ function openDetail(entry) {
       <span>${formatDate(entry.date)}</span>
       <span class="meta-dot"></span>
       <span class="detail-loves">${HEART}${entry.loves ?? 0}</span>
-      <span class="meta-dot"></span>
-      <a class="detail-visit" href="${escapeAttr(entry.url)}" target="_blank" rel="noopener noreferrer">Visit →</a>
+      ${visitLink}
     </div>
     ${notes}`;
 
@@ -181,6 +191,7 @@ function closeDetail() {
   $detail.hidden = true;
   document.body.classList.remove('detail-open');
   $detailBody.replaceChildren(); // stops any playing video
+  if (_detailOpener) { _detailOpener.focus(); _detailOpener = null; }
 }
 
 document.getElementById('detail-close').addEventListener('click', closeDetail);

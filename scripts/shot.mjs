@@ -1,7 +1,7 @@
 // usage: node scripts/shot.mjs <url> <id> [--motion]
 // writes assets/<id>.png always; assets/<id>.webm if --motion
 import { chromium } from 'playwright';
-import { rename, readdir, rm } from 'node:fs/promises';
+import { rename, rm } from 'node:fs/promises';
 
 const [url, id] = process.argv.slice(2);
 const motion = process.argv.includes('--motion');
