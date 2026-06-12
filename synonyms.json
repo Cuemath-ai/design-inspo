@@ -1,0 +1,17 @@
+{
+  "moody": ["dark", "dramatic", "noir", "atmospheric"],
+  "playful": ["fun", "whimsical", "bouncy", "joyful", "cartoon"],
+  "minimal": ["clean", "simple", "sparse", "quiet", "restraint"],
+  "premium": ["luxury", "elegant", "refined", "high-end", "sophisticated"],
+  "brutalist": ["raw", "stark", "unpolished", "harsh"],
+  "editorial": ["magazine", "typographic", "print-like", "publication"],
+  "retro": ["vintage", "nostalgic", "y2k", "80s", "90s"],
+  "motion": ["animation", "animated", "transition", "kinetic", "movement"],
+  "3d": ["webgl", "three-dimensional", "immersive", "spatial"],
+  "onboarding": ["signup", "first-run", "walkthrough", "welcome"],
+  "dashboard": ["analytics", "admin", "data-viz", "charts", "metrics"],
+  "landing": ["landing-page", "marketing-page", "homepage", "hero"],
+  "colourful": ["colorful", "vibrant", "saturated", "rainbow", "bold-colour"],
+  "gradient": ["mesh", "aurora", "blur"],
+  "kids": ["children", "child", "k-12", "education", "edtech"]
+}
