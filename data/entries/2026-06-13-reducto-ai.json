@@ -1,0 +1,24 @@
+{
+  "id": "2026-06-13-reducto-ai",
+  "type": "site",
+  "url": "https://reducto.ai",
+  "title": "Reducto",
+  "description": "Mathy and warm illustrations",
+  "notes": [
+    { "by": "Manik", "note": "Warm palette and grid use on website", "date": "2026-06-13" }
+  ],
+  "addedBy": "Manik",
+  "date": "2026-06-13",
+  "updated": "2026-06-13",
+  "loves": 1,
+  "slack_ts": "1781292013.315049",
+  "tags": {
+    "style": ["geometric", "line-art", "blueprint", "technical"],
+    "mood": ["warm", "precise", "mathy"],
+    "colour": ["charcoal", "warm-neutral", "muted-accents"],
+    "component": ["illustration", "brand-graphics", "grid"],
+    "medium": ["illustration", "website"],
+    "industry": ["ai", "dev-tools"]
+  },
+  "asset": "assets/2026-06-13-reducto-ai.png"
+}
