@@ -1,0 +1,93 @@
+# SWEEP.md — daily Inspo sweep procedure
+
+You are running the Inspo sweep in the design-inspo repo. Work through ALL
+steps. Judgment calls (tags, descriptions, motion-worthiness) are yours;
+everything mechanical uses the scripts. Never invent entries; every entry
+traces to a Slack message.
+
+## 0. Setup
+- `git pull` first.
+- Read `state.json` → `last_swept_at` (null = first run: process entire
+  channel history), `pending` (nudged messages awaiting a description).
+- Find the channel id for #design-inspo via the Slack connector
+  (search channels once, then cache the id in state.json as `channel_id`).
+
+## 1. Collect
+- Read all channel messages newer than `last_swept_at` (top-level only;
+  thread replies are handled in steps 2 and 4).
+- Also read the threads of every message in `pending`.
+
+## 2. Pending nudges
+For each pending item whose thread now has a reply from the author:
+treat the reply as the description and process the original message via
+step 3. Remove from `pending`. If still no reply: leave it (ONE nudge ever —
+never re-nudge).
+
+## 3. Process each new top-level message
+Skip bot/digest/rules messages and plain conversation (a message with no
+link and no file attachment is conversation — ignore it).
+
+a. **Extract**: first URL in the text, file attachments, remaining text =
+   the description candidate. Author display name via the connector.
+b. **No description?** (bare link/file, or text adds nothing): reply in
+   thread — "What caught your eye? One line and it's in." Add to
+   `pending` with the message ts. STOP processing this message.
+c. **Duplicate?** Normalize the URL (lowercase host, strip trailing slash,
+   query params, and fragment) and compare against the `url` of every file
+   in data/entries/. If it exists: append {by, note: their description,
+   date} to that entry's `notes[]`, bump `updated`, reply in thread
+   "Already saved by {addedBy} on {date} — added your note to it ✓",
+   and skip to the next message.
+d. **Capture**:
+   - URL → decide motion-worthiness: capture motion when the description
+     mentions movement (animation/transition/scroll/hover/motion/🎬) OR
+     the site is plainly animation-led. Then:
+     `node scripts/shot.mjs <url> <id> [--motion]`
+   - File upload → download the file via the connector / its url_private
+     (NEEDS MANIK'S SLACK AUTH — verified in the dry run) into
+     `assets/<id>.<ext>`. type = image or video by extension.
+   - id = `YYYY-MM-DD-<slug-from-domain-or-filename>`; if taken, append `-2`.
+   - Open the captured still with the Read tool. Blank/cookie-walled/broken?
+     Retry once; if still bad, keep the entry but note it and tell Manik in
+     the final report.
+e. **Tag**: 5–12 lowercase-kebab-case tags across style, mood, colour,
+   component, medium, industry. Be generous and concrete — tags power
+   search. Reuse existing vocabulary where it fits (check a few recent
+   entries); new tags are fine when warranted. If you coin a tag that has
+   an obvious synonym cluster, add it to synonyms.json.
+f. **Write** `data/entries/<id>.json` per the README schema. `title` =
+   site/product name. `description` = the author's words (light cleanup
+   only — it stays THEIR voice). `addedBy` = author first name. Include
+   `slack_ts` = the source message ts (used for edit-command lookups).
+g. **Confirm in thread**: "Added ✓ — tagged: {4–6 best tags} →
+   https://cuemath-ai.github.io/design-inspo/"
+
+## 4. Edit commands
+Read the threads of existing entries that received new replies; match
+entry by `slack_ts`:
+- `retag: a, b, c` → merge those tags in (replace a dimension only if they
+  prefix it like `mood: x, y`).
+- `edit: <text>` → replace description with <text>.
+- `remove` → delete the entry JSON and its assets.
+React or reply briefly to confirm each applied command.
+
+## 5. Loves
+For every entry whose `date` is within the last 30 days, re-read its
+original message's reactions; `loves` = total reaction count across all
+emoji. Update changed entries (bump nothing else).
+
+## 6. Publish
+- `npm run build`
+- Update state.json: `last_swept_at` = newest processed message ts,
+  current `pending` list.
+- `git add -A && git commit -m "sweep: <N> added, <M> updated" && git push`
+
+## 7. Friday digest (only if today is Friday)
+Post to #design-inspo: "This week: {N} new inspirations 🧲 {top 2–3 by
+loves, each as 'title — description fragment (saved by X)'} Browse:
+https://cuemath-ai.github.io/design-inspo/". Skip entirely if N is 0.
+
+## 8. Report
+End with a one-paragraph summary for Manik: added/merged/nudged/edited
+counts, anything that failed (bad screenshots, undownloadable files,
+dead links), and any synonyms.json additions.
