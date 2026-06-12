@@ -39,6 +39,11 @@ c. **Duplicate?** Normalize the URL (lowercase host, strip trailing slash,
    "Already saved by {addedBy} on {date} — added your note to it ✓",
    and skip to the next message.
 d. **Capture**:
+   - **Upload + URL in the same message** → the upload is the card image
+     (the author cropped what matters — never replace it with an auto
+     screenshot) and the URL is stored as the entry's `url` (the Visit
+     link). type = site. Capture motion of the URL only if the description
+     flags movement.
    - URL → decide motion-worthiness: capture motion when the description
      mentions movement (animation/transition/scroll/hover/motion/🎬) OR
      the site is plainly animation-led. Then:
