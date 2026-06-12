@@ -163,8 +163,9 @@ function openDetail(entry, openerEl) {
     : '';
 
   const visitLink = RE_SAFE_URL.test(entry.url)
-    ? `<span class="meta-dot"></span>
-      <a class="detail-visit" href="${escapeAttr(entry.url)}" target="_blank" rel="noopener noreferrer">Visit →</a>`
+    ? `<a class="detail-visit" href="${escapeAttr(entry.url)}" target="_blank" rel="noopener noreferrer">Visit site
+        <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 9L9 3M4.5 3H9v4.5" stroke="currentColor" stroke-width="1.3"/></svg>
+      </a>`
     : '';
 
   $detailBody.innerHTML = `
@@ -181,9 +182,15 @@ function openDetail(entry, openerEl) {
     </div>
     ${notes}`;
 
+  const others = visible().filter(e => e.id !== entry.id);
+  const $more = document.getElementById('detail-more');
+  document.getElementById('detail-more-grid').replaceChildren(...others.map((e, i) => card(e, i)));
+  $more.hidden = others.length === 0;
+
   $detail.hidden = false;
   document.body.classList.add('detail-open');
-  document.getElementById('detail-close').focus();
+  document.getElementById('detail-scroll').scrollTop = 0;
+  document.getElementById('detail-back').focus();
 }
 
 function closeDetail() {
@@ -195,9 +202,11 @@ function closeDetail() {
 }
 
 document.getElementById('detail-close').addEventListener('click', closeDetail);
+document.getElementById('detail-back').addEventListener('click', closeDetail);
 $detail.addEventListener('click', ev => {
-  // backdrop click — anything that isn't inside the article closes
-  if (!ev.target.closest('.detail-body') && !ev.target.closest('.detail-close')) closeDetail();
+  // backdrop click — anything that isn't inside the article, controls, or the more-grid closes
+  if (!ev.target.isConnected) return; // clicked a keep-browsing card that was just re-rendered
+  if (!ev.target.closest('.detail-body, .detail-close, .detail-back, .detail-more')) closeDetail();
 });
 
 /* ── controls ──────────────────────────────────────────────── */
