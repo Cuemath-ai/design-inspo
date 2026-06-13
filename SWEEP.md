@@ -100,10 +100,12 @@ emoji. Update changed entries (bump nothing else).
   current `pending` list.
 - `git add -A && git commit -m "sweep: <N> added, <M> updated" && git push`
 
-## 7. Friday digest (only if today is Friday)
-Post via the bot to the channel (not a thread):
+## 7. Friday digest (once per Friday)
+The sweep runs hourly, so guard against repeats: post ONLY if today is Friday
+AND `state.json.last_digest_date` is not today's date. After posting, set
+`last_digest_date` to today. Skip entirely if N (entries added in the last 7
+days) is 0. Post via the bot to the channel (not a thread):
 `node scripts/bot.mjs post <channel_id> "This week: {N} new inspirations 🧲 {top 2–3 by loves, each as 'title — description fragment (saved by X)'} Browse: https://cuemath-ai.github.io/design-inspo/"`
-Skip entirely if N is 0.
 
 ## 8. Report
 End with a one-paragraph summary for Manik: added/merged/nudged/edited
