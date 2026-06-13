@@ -52,7 +52,7 @@ export default {
             body: JSON.stringify({
               channel: e.channel,
               thread_ts: e.ts,
-              text: "Ooh, nice find! 🐼 Quick one — what caught your eye? Drop a line here and it's in the gallery."
+              text: "Ooh, nice find! 🐼 But I can't add it to the gallery yet — tell me what caught your eye. Drop one line in this thread and it's in. ✨"
             })
           });
         }
