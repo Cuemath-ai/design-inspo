@@ -1,15 +1,13 @@
 {
   "id": "2026-06-13-stripe-press-boom",
   "type": "site",
-  "url": "https://press.stripe.com/boom",
-  "title": "Stripe Press — Boom",
+  "url": "https://press.stripe.com",
+  "title": "Stripe Press",
   "description": "Awesome navigation interaction",
-  "notes": [
-    { "by": "Manik", "note": "Amazing digital book cover - square and circle visuals", "date": "2026-06-13" }
-  ],
+  "notes": [],
   "addedBy": "Manik",
   "date": "2026-06-13",
-  "updated": "2026-06-13",
+  "updated": "2026-06-14",
   "loves": 0,
   "slack_ts": "1781294417.616069",
   "tags": {

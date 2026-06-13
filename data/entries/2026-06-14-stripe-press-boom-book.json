@@ -1,0 +1,22 @@
+{
+  "id": "2026-06-14-stripe-press-boom-book",
+  "type": "site",
+  "url": "https://www.stripe.press/boom",
+  "title": "Stripe Press — Boom",
+  "description": "Amazing digital book cover — square and circle visuals",
+  "notes": [],
+  "addedBy": "Manik",
+  "date": "2026-06-14",
+  "updated": "2026-06-14",
+  "loves": 0,
+  "slack_ts": "1781294538.139259",
+  "tags": {
+    "style": ["editorial", "minimal", "typographic"],
+    "mood": ["playful", "premium", "soft"],
+    "colour": ["pink", "magenta", "monochrome-tint"],
+    "component": ["book-cover", "generative", "particle", "hero"],
+    "medium": ["website"],
+    "industry": ["publishing"]
+  },
+  "asset": "assets/2026-06-14-stripe-press-boom-book.png"
+}
