@@ -79,9 +79,16 @@ Two jobs:
    already (it checks the channel for a 🧲 in the last ~10h). Reads the live
    `index.json` to count the week's adds.
 
+It also serves the **gallery "like" API** (added 2026-06-13):
+- `GET /loves` → `{ entryId: count }` for the whole library (gallery likes only).
+- `POST /love` `{id, delta:+1|-1}` → toggles one like, returns the new count.
+- Both send CORS headers for the Pages origin. Counts persist in a free
+  Cloudflare **KV** store (binding `LOVES`, a single key `counts` holding the
+  JSON map). Not transactional — fine for an internal team's like counts.
+
 **Worker secrets** (set via `wrangler secret put`, never in git):
 `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`.
-**Worker var:** `INSPO_CHANNEL = C0BA05V4C7M` (in wrangler.toml).
+**Worker var:** `INSPO_CHANNEL = C0BA05V4C7M`. **KV binding:** `LOVES` (both in wrangler.toml).
 
 **Deploy / operate** (from `worker/`):
 ```
@@ -147,6 +154,12 @@ Static, no framework. Served from the repo root of `main`.
   `scoreEntry`); unit-tested.
 - `synonyms.json` — the synonym map that makes "moody"/"playful" etc. match
   related tags. Extend this to improve search.
+- **Likes:** each card and the detail view have a heart. Clicking it calls the
+  Worker's `/love` endpoint (§3) and toggles your like. The displayed love count
+  = Slack reactions (from `index.json`, synced by the sweep) **plus** gallery
+  likes (live from the Worker). "Sort by Loved" uses that sum. One like per
+  browser (tracked in `localStorage` key `inspo-liked`). On touch devices the
+  card heart only appears in the detail view (cards reveal it on hover).
 - `bundle.css` — CueDesign design system (tokens + embedded Athletics / Untitled
   Sans fonts via `@font-face local()`). Copied from Cuemath-Hive. On machines
   without those fonts it falls back per the design system's own stack.
