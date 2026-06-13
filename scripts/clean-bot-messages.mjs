@@ -3,7 +3,8 @@
 // messages the bot itself posted, so human posts are untouched.
 import { readFile } from 'node:fs/promises';
 
-const token = (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
+const token = process.env.SLACK_BOT_TOKEN?.trim()
+  || (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
 const channel = process.argv[2] || 'C0BA05V4C7M';
 
 async function api(method, body) {

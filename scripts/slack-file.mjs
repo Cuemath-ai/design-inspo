@@ -5,7 +5,8 @@
 // usage: node scripts/slack-file.mjs <url_private> <dest_path>
 import { readFile, writeFile } from 'node:fs/promises';
 
-const token = (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
+const token = process.env.SLACK_BOT_TOKEN?.trim()
+  || (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
 const [url, dest] = process.argv.slice(2);
 if (!url || !dest) { console.error('usage: slack-file.mjs <url_private> <dest_path>'); process.exit(1); }
 

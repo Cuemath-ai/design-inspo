@@ -8,7 +8,8 @@
 //   node scripts/bot.mjs react  <channel> <message_ts> <emoji>
 import { readFile } from 'node:fs/promises';
 
-const token = (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
+const token = process.env.SLACK_BOT_TOKEN?.trim()
+  || (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
 
 async function slack(method, body) {
   const res = await fetch(`https://slack.com/api/${method}`, {

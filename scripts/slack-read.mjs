@@ -6,7 +6,8 @@
 //   oldest_ts: only messages strictly newer than this (default 0 = all history)
 import { readFile } from 'node:fs/promises';
 
-const token = (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
+const token = process.env.SLACK_BOT_TOKEN?.trim()
+  || (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
 const channel = process.argv[2];
 const oldest = process.argv[3] || '0';
 if (!channel) { console.error('usage: slack-read.mjs <channel_id> [oldest_ts]'); process.exit(1); }
