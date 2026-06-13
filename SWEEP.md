@@ -39,10 +39,13 @@ conversation (a message with no link and no file attachment is conversation
 
 a. **Extract**: first URL in the text, file attachments, remaining text =
    the description candidate. Author display name via the connector.
-b. **No description?** (bare link/file, or text adds nothing): nudge in
-   thread via the bot —
+b. **No description?** (bare link/file, or text adds nothing): the instant
+   Worker usually nudges within a second, so FIRST check the thread — if the
+   Inspo bot has already nudged there, just add to `pending` (do NOT nudge
+   again). Only if no bot nudge exists yet, nudge in thread via the bot —
    `node scripts/bot.mjs post <channel_id> "What caught your eye? One line and it's in." <message_ts>`
-   Add to `pending` with the message ts. STOP processing this message.
+   then add to `pending` with the message ts. Either way, STOP processing
+   this message.
 c. **Duplicate?** Normalize the URL (lowercase host, strip trailing slash,
    query params, and fragment) and compare against the `url` of every file
    in data/entries/. If it exists: append {by, note: their description,
