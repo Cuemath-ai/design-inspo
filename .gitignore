@@ -3,3 +3,4 @@ assets/.tmp-video/
 .browser-profile/
 .slack-auth.json
 .slack-bot-token
+.slack-signing-secret
