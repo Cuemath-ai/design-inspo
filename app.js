@@ -162,15 +162,19 @@ function card(entry, i) {
 
   const meta = document.createElement('figcaption');
   meta.className = 'shot-meta';
-  meta.innerHTML = `
-    <p class="shot-desc">${escapeHtml(entry.description ?? '')}</p>
-    <span class="shot-by">${escapeHtml(entry.addedBy ?? '')}</span>`;
+  meta.innerHTML = `<p class="shot-desc">${escapeHtml(entry.description ?? '')}</p>`;
+  const foot = document.createElement('div');
+  foot.className = 'shot-foot';
+  const by = document.createElement('span');
+  by.className = 'shot-by';
+  by.textContent = entry.addedBy ?? '';
   const love = document.createElement('button');
   love.type = 'button';
   love.className = 'shot-loves';
   love.innerHTML = `${HEART}<span class="love-n">0</span>`;
   wireLove(love, entry);
-  meta.appendChild(love);
+  foot.append(by, love);
+  meta.appendChild(foot);
   fig.appendChild(meta);
 
   fig.addEventListener('click', () => openDetail(entry, fig));
