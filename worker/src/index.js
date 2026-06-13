@@ -22,6 +22,32 @@ async function slack(method, token, body) {
 
 export default {
   async fetch(req, env) {
+    const url = new URL(req.url);
+    // CORS so the gallery (a different origin) can call these like endpoints.
+    const cors = {
+      'access-control-allow-origin': 'https://cuemath-ai.github.io',
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
+      'access-control-allow-headers': 'content-type'
+    };
+    if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    // GET /loves → { entryId: galleryLikeCount } for the whole library.
+    if (url.pathname === '/loves' && req.method === 'GET') {
+      const counts = JSON.parse((await env.LOVES.get('counts')) || '{}');
+      return Response.json(counts, { headers: cors });
+    }
+    // POST /love {id, delta:+1|-1} → toggle one gallery like, returns new count.
+    if (url.pathname === '/love' && req.method === 'POST') {
+      const { id, delta } = await req.json().catch(() => ({}));
+      if (!id || (delta !== 1 && delta !== -1)) {
+        return new Response('bad request', { status: 400, headers: cors });
+      }
+      const counts = JSON.parse((await env.LOVES.get('counts')) || '{}');
+      counts[id] = Math.max(0, (counts[id] || 0) + delta);
+      await env.LOVES.put('counts', JSON.stringify(counts));
+      return Response.json({ id, count: counts[id] }, { headers: cors });
+    }
+
     if (req.method !== 'POST') return new Response('Inspo worker');
 
     const body = await req.text();

@@ -360,10 +360,31 @@ body {
   color: color-mix(in srgb, #FFFFFF 64%, transparent);
 }
 
+.shot-loves {
+  /* it's a real <button> now — strip the default chrome */
+  background: none;
+  border: 0;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  pointer-events: none;   /* only clickable once the meta is revealed (below) */
+  transition: color var(--duration-fast) var(--ease-default),
+              transform var(--duration-fast) var(--ease-default);
+}
+
+/* the meta panel is click-through, but the heart itself takes clicks on hover */
+.shot:hover .shot-loves,
+.shot:focus-within .shot-loves { pointer-events: auto; }
+
 .shot-loves svg {
   width: 11px;
   height: 11px;
 }
+
+.shot-loves:hover { color: #FFFFFF; }
+.shot-loves.is-liked { color: var(--text-brand); }
+.shot-loves:active { transform: scale(0.88); }
 
 .shot:focus-visible {
   outline: 2px solid var(--focus-color);
@@ -496,9 +517,22 @@ body {
   display: inline-flex;
   align-items: center;
   gap: var(--space-4);
+  background: none;
+  border: 0;
+  padding: 2px 4px;
+  margin: -2px 0;
+  border-radius: var(--radius-full);
+  font: inherit;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-default),
+              transform var(--duration-fast) var(--ease-default);
 }
 
-.detail-loves svg { width: 12px; height: 12px; color: var(--text-brand); }
+.detail-loves svg { width: 12px; height: 12px; }
+.detail-loves:hover { color: var(--text-secondary); }
+.detail-loves.is-liked { color: var(--text-brand); }
+.detail-loves:active { transform: scale(0.9); }
 
 .detail-visit {
   display: inline-flex;

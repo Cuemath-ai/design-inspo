@@ -7,6 +7,11 @@ compatibility_date = "2024-09-01"
 [vars]
 INSPO_CHANNEL = "C0BA05V4C7M"
 
+# Free key-value store holding gallery "like" counts ({entryId: count}).
+[[kv_namespaces]]
+binding = "LOVES"
+id = "b001cf56e02741e7b129952c9a226945"
+
 # Safety-net digest: Monday 11:30 UTC = 5:00 PM IST. The Mac sweep normally posts
 # it earlier (10 AM–4 PM IST); this only fires if the laptop never got the chance.
 [triggers]

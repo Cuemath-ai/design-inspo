@@ -4,8 +4,9 @@
 import { expandQuery, scoreEntry } from './search.js';
 
 const RE_SAFE_URL = /^https?:\/\//i;
+const WORKER = 'https://inspo-nudge.manik-bansal.workers.dev';
 
-const state = { entries: [], synonyms: {}, query: '', chip: null, sort: 'recent' };
+const state = { entries: [], synonyms: {}, query: '', chip: null, sort: 'recent', galleryLoves: {}, liked: new Set() };
 
 const $grid = document.getElementById('grid');
 const $chips = document.getElementById('chips');
@@ -19,13 +20,46 @@ const HEART = `<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><
 const PLAY = `<svg viewBox="0 0 9 10" fill="currentColor" aria-hidden="true"><path d="M0 0L9 5L0 10Z"/></svg>`;
 
 async function init() {
-  const [entries, synonyms] = await Promise.all([
+  const [entries, synonyms, galleryLoves] = await Promise.all([
     fetch('index.json').then(r => r.json()),
-    fetch('synonyms.json').then(r => r.json())
+    fetch('synonyms.json').then(r => r.json()),
+    fetch(`${WORKER}/loves`).then(r => r.json()).catch(() => ({}))   // gallery likes
   ]);
   state.entries = entries; state.synonyms = synonyms;
+  state.galleryLoves = galleryLoves || {};
+  state.liked = new Set(JSON.parse(localStorage.getItem('inspo-liked') || '[]'));
   renderChips(topTags(entries, 12));
   render();
+}
+
+// Total loves = Slack reactions (baked into index.json) + gallery likes (live).
+function loveCount(entry) {
+  return (entry.loves ?? 0) + (state.galleryLoves[entry.id] ?? 0);
+}
+
+// Wire a heart button: reflects liked state, toggles the like, talks to the Worker.
+function wireLove(btn, entry) {
+  const sync = () => {
+    const liked = state.liked.has(entry.id);
+    btn.classList.toggle('is-liked', liked);
+    btn.setAttribute('aria-pressed', String(liked));
+    btn.setAttribute('aria-label', `${loveCount(entry)} loves — ${liked ? 'remove your like' : 'love this'}`);
+    btn.querySelector('.love-n').textContent = loveCount(entry);
+  };
+  sync();
+  btn.addEventListener('click', ev => {
+    ev.stopPropagation();          // don't open the detail view
+    const liked = state.liked.has(entry.id);
+    const delta = liked ? -1 : 1;
+    if (liked) state.liked.delete(entry.id); else state.liked.add(entry.id);
+    localStorage.setItem('inspo-liked', JSON.stringify([...state.liked]));
+    state.galleryLoves[entry.id] = Math.max(0, (state.galleryLoves[entry.id] ?? 0) + delta);
+    sync();
+    fetch(`${WORKER}/love`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: entry.id, delta })
+    }).catch(() => {});            // optimistic — ignore network hiccups
+  });
 }
 
 function topTags(entries, n) {
@@ -43,7 +77,7 @@ function visible() {
     list = list.map(e => [scoreEntry(e, terms), e]).filter(([s]) => s > 0)
                .sort((a, b) => b[0] - a[0]).map(([, e]) => e);
   } else if (state.sort === 'loved') {
-    list = [...list].sort((a, b) => (b.loves ?? 0) - (a.loves ?? 0));
+    list = [...list].sort((a, b) => loveCount(b) - loveCount(a));
   }
   return list;
 }
@@ -130,8 +164,13 @@ function card(entry, i) {
   meta.className = 'shot-meta';
   meta.innerHTML = `
     <p class="shot-desc">${escapeHtml(entry.description ?? '')}</p>
-    <span class="shot-by">${escapeHtml(entry.addedBy ?? '')}</span>
-    <span class="shot-loves">${HEART}${entry.loves ?? 0}</span>`;
+    <span class="shot-by">${escapeHtml(entry.addedBy ?? '')}</span>`;
+  const love = document.createElement('button');
+  love.type = 'button';
+  love.className = 'shot-loves';
+  love.innerHTML = `${HEART}<span class="love-n">0</span>`;
+  wireLove(love, entry);
+  meta.appendChild(love);
   fig.appendChild(meta);
 
   fig.addEventListener('click', () => openDetail(entry, fig));
@@ -177,10 +216,12 @@ function openDetail(entry, openerEl) {
       <span class="meta-dot"></span>
       <span>${formatDate(entry.date)}</span>
       <span class="meta-dot"></span>
-      <span class="detail-loves">${HEART}${entry.loves ?? 0}</span>
+      <button class="detail-loves" type="button">${HEART}<span class="love-n">0</span></button>
       ${visitLink}
     </div>
     ${notes}`;
+
+  wireLove($detailBody.querySelector('.detail-loves'), entry);
 
   const others = visible().filter(e => e.id !== entry.id);
   const $more = document.getElementById('detail-more');
