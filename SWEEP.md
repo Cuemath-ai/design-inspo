@@ -114,13 +114,24 @@ emoji. Update changed entries (bump nothing else).
   current `pending` list.
 - `git add -A && git commit -m "sweep: <N> added, <M> updated" && git push`
 
-## 7. Weekly digest (Mondays, 1 PM, in Po's voice)
-The sweep runs hourly, so guard against repeats: post ONLY if today is Monday
-AND local time is 13:00 or later AND `state.json.last_digest_date` is not
-today's date. After posting, set `last_digest_date` to today's date.
+## 7. Weekly digest (Mondays, in Po's voice — primary; Worker is the backstop)
+The Cloudflare Worker will post a template digest at 5 PM IST Monday IF no
+digest has gone out. This sweep is the PRIMARY, freshly-written path — aim to
+beat the Worker so the team gets real AI-written Po, not a template.
 
-Count N = entries added in the last 7 days. Post via the bot to the channel
-(not a thread): `node scripts/bot.mjs post <channel_id> "<message>"`.
+Post the digest ONLY if ALL of these hold:
+- today is **Monday**, and
+- local time is between **10:00 and 16:59** (leave 17:00 to the Worker), and
+- **no digest has been posted yet this Monday.** Check this by running
+  `node scripts/slack-read.mjs <channel_id> <today-00:00 ts>` and looking for
+  any bot message whose text contains **🧲** (every digest, sweep or Worker,
+  carries that magnet). If one exists, the digest is already out — SKIP.
+
+When posting, the message MUST start with **🧲** (this is the shared marker that
+stops the Worker double-posting). Send via the bot to the channel (not a
+thread): `node scripts/bot.mjs post <channel_id> "<message>"`.
+
+Count N = entries added in the last 7 days.
 
 **Voice — the bot's personality is Po from Kung Fu Panda:** warm, goofy,
 humble, big-hearted; food metaphors (dumplings, noodles); the occasional
@@ -129,10 +140,11 @@ SHORT — 2 to 4 lines. Genuinely encouraging, never cringe or bloated. Each
 week: state N, optionally name the most-loved find of the week, include the
 gallery link (https://cuemath-ai.github.io/design-inspo/), and rally the team
 to add more. If N is 0, post a gentle "quiet week, let's change that" version
-rather than skipping. Vary the wording every week — never copy these verbatim:
+rather than skipping. Vary the wording every week — never copy these verbatim
+(note the leading 🧲):
 
-- "Whoaa — 7 new inspirations this week! That's a full plate of dumplings for the eyes 🥟 The crew loved *{title}* most. Now... what beauty will YOU drop this week? There is no charge for awesomeness. Skadoosh 🐼 → {link}"
-- "Only 1 new find this week — but even one dumpling can start a feast, yeah? 🐼 Let's fill the board, team. Drop what's inspiring you → {link}"
+- "🧲 Whoaa — 7 new inspirations this week! That's a full plate of dumplings for the eyes 🥟 The crew loved *{title}* most. Now... what beauty will YOU drop this week? There is no charge for awesomeness. Skadoosh 🐼 → {link}"
+- "🧲 Only 1 new find this week — but even one dumpling can start a feast, yeah? 🐼 Let's fill the board, team. Drop what's inspiring you → {link}"
 
 ## 8. Report
 End with a one-paragraph summary for Manik: added/merged/nudged/edited

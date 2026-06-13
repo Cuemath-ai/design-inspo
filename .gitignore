@@ -4,3 +4,6 @@ assets/.tmp-video/
 .slack-auth.json
 .slack-bot-token
 .slack-signing-secret
+.dev.vars
+worker/.dev.vars
+worker/.wrangler/
