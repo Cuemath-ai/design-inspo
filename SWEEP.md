@@ -54,9 +54,17 @@ join notices, and plain conversation (no link and no file = conversation).
 - **New inspiration**: pick `id` = `YYYY-MM-DD-<slug>`. Capture:
   - link → `shot.mjs <url> <id>` (add `--motion` if the text mentions
     movement/animation/scroll/hover/🎬, or the site is clearly motion-led).
-  - file upload → `slack-file.mjs <file.url_private> assets/<id>.<ext>` (ext from
-    mimetype). If a message has BOTH a file and a link, the file is the card and
-    the link is the entry `url`.
+  - image upload → `slack-file.mjs <file.url_private> assets/<id>.<ext>`; that
+    image IS the card (`asset`). If the message also has a link, that link is the
+    entry `url`.
+  - **video upload** (a person shared a clip/screen recording — e.g. "navigation
+    interaction") → download it, convert to mp4 if needed (`ffmpeg … assets/<id>.mp4`),
+    set `motion` to it, AND extract a frame as the still thumbnail so the card
+    shows THEIR video, not an auto-screenshot:
+    `ffmpeg -y -ss 1 -i assets/<id>.mp4 -vframes 1 assets/<id>.png -loglevel error`.
+    Do NOT auto-screenshot the link in this case. If the message also has a link,
+    it's the entry `url`.
+  - link only → `shot.mjs <url> <id>` (see above).
   - Open the captured `assets/<id>.png` with **Read** to confirm it isn't blank.
 
 ## 3. Write the entry
