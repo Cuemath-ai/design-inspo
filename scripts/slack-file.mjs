@@ -1,60 +1,24 @@
-// usage: node scripts/slack-file.mjs <file_id> <out_path>
-// Downloads a Slack file upload. First run opens a browser window — log into
-// cuemath.slack.com once; a session token is saved to .slack-auth.json
-// (gitignored) and all later runs are headless and instant. If the token
-// expires, the window opens again automatically.
+// Download a Slack-uploaded file via the BOT token (needs the files:read scope).
+// Replaces the old browser-session approach so file downloads work headless,
+// including in Claude cloud. Pass the file's url_private (from slack-read.mjs).
+//
+// usage: node scripts/slack-file.mjs <url_private> <dest_path>
 import { readFile, writeFile } from 'node:fs/promises';
 
-const [fileId, outPath] = process.argv.slice(2);
-if (!fileId || !outPath) { console.error('usage: slack-file.mjs <file_id> <out_path>'); process.exit(1); }
+const token = (await readFile(new URL('../.slack-bot-token', import.meta.url), 'utf8')).trim();
+const [url, dest] = process.argv.slice(2);
+if (!url || !dest) { console.error('usage: slack-file.mjs <url_private> <dest_path>'); process.exit(1); }
 
-async function harvestAuth() {
-  const { chromium } = await import('playwright');
-  const ctx = await chromium.launchPersistentContext('.browser-profile', {
-    headless: false, viewport: { width: 1200, height: 800 }
-  });
-  const page = ctx.pages()[0] ?? await ctx.newPage();
-  await page.goto('https://cuemath.slack.com', { waitUntil: 'domcontentloaded' }).catch(() => {});
-  console.log('Log into Slack in the browser window (workspace: cuemath)…');
-  // wait for the session cookie that appears once login completes (up to 5 min)
-  let d;
-  for (let i = 0; i < 150 && !d; i++) {
-    d = (await ctx.cookies('https://cuemath.slack.com')).find(c => c.name === 'd');
-    if (!d) await new Promise(r => setTimeout(r, 2000));
-  }
-  if (!d) throw new Error('Slack login timed out');
-  // boot the web client (not the desktop-app handoff page) to read the API token
-  await page.goto('https://app.slack.com/client', { waitUntil: 'domcontentloaded' }).catch(() => {});
-  await page.waitForFunction(() => !!localStorage.getItem('localConfig_v2'), { timeout: 120000 });
-  const token = await page.evaluate(
-    () => Object.values(JSON.parse(localStorage.getItem('localConfig_v2')).teams)[0].token
-  );
-  await ctx.close();
-  const auth = { token, cookie: `d=${d.value}` };
-  await writeFile(new URL('../.slack-auth.json', import.meta.url), JSON.stringify(auth));
-  return auth;
+const res = await fetch(url, { headers: { authorization: `Bearer ${token}` } });
+if (!res.ok) { console.error('download failed:', res.status); process.exit(1); }
+
+const ct = res.headers.get('content-type') || '';
+const buf = Buffer.from(await res.arrayBuffer());
+// Slack serves an HTML sign-in page (HTTP 200) when the token can't read the
+// file — catch that so we never save a login page as if it were an image.
+if (ct.includes('text/html')) {
+  console.error('got an HTML page, not a file — the bot is likely missing the files:read scope');
+  process.exit(1);
 }
-
-let auth;
-try { auth = JSON.parse(await readFile(new URL('../.slack-auth.json', import.meta.url), 'utf8')); }
-catch { auth = await harvestAuth(); }
-
-const headers = () => ({ Authorization: `Bearer ${auth.token}`, Cookie: auth.cookie });
-
-async function fileInfo() {
-  const r = await fetch(`https://cuemath.slack.com/api/files.info?file=${fileId}`, { headers: headers() });
-  return r.json();
-}
-
-let info = await fileInfo();
-if (!info.ok && ['invalid_auth', 'not_authed', 'token_expired'].includes(info.error)) {
-  auth = await harvestAuth();
-  info = await fileInfo();
-}
-if (!info.ok) { console.error(`files.info failed: ${info.error}`); process.exit(1); }
-
-const url = info.file.url_private_download || info.file.url_private;
-const resp = await fetch(url, { headers: headers() });
-if (!resp.ok) { console.error(`download failed: HTTP ${resp.status}`); process.exit(1); }
-await writeFile(outPath, Buffer.from(await resp.arrayBuffer()));
-console.log(`saved ${outPath} (${info.file.mimetype}, ${info.file.size} bytes)`);
+await writeFile(dest, buf);
+console.log(`saved ${dest} (${ct}, ${buf.length} bytes)`);

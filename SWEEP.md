@@ -11,18 +11,28 @@ traces to a Slack message.
   channel history), `pending` (nudged messages awaiting a description),
   `channel_id` (already cached: `C0BA05V4C7M`).
 
-**Posting convention — everything OUTBOUND goes through the Inspo bot, not
-your account.** Read the channel/threads/reactions with the Slack connector
-(invisible). But every reply, nudge, confirmation, and the digest is sent via:
-- `node scripts/bot.mjs post <channel_id> "<text>" [thread_ts]`
-- `node scripts/bot.mjs react <channel_id> <message_ts> <emoji>`  (e.g. `white_check_mark`)
-So contributors see replies from **Inspo**, never from a person. Never use the
-connector's send-message tool during the sweep.
+**This sweep is fully headless — it uses the bot token for everything and needs
+no interactive Slack login, so it runs identically on a Mac or in Claude cloud.**
+
+- **Read** the channel (messages + threads + reactions + file info):
+  `node scripts/slack-read.mjs <channel_id> <last_swept_at>` → prints JSON.
+  (Pass `0` as the timestamp for a full first-run history pull.)
+- **Post / react** (every reply, nudge, confirmation, digest — all appear as
+  the Inspo bot, never a person):
+  `node scripts/bot.mjs post <channel_id> "<text>" [thread_ts]`
+  `node scripts/bot.mjs react <channel_id> <message_ts> <emoji>` (e.g. `white_check_mark`)
+- **Download an uploaded file:**
+  `node scripts/slack-file.mjs <url_private> assets/<id>.<ext>`
+
+Do NOT use the Slack connector / MCP tools anywhere in the sweep — the cloud
+runner won't have them.
 
 ## 1. Collect
-- Read all channel messages newer than `last_swept_at` (top-level only;
-  thread replies are handled in steps 2 and 4).
-- Also read the threads of every message in `pending`.
+- Run `node scripts/slack-read.mjs <channel_id> <last_swept_at>` and parse the
+  JSON. Each item has ts, user, bot_id, subtype, text, thread_ts, reactions,
+  files (with url_private), and (if any) replies. This is your whole input.
+- Pending threads are already included (the reader returns each message's
+  replies), so you can resolve nudges from the same JSON.
 
 ## 2. Pending nudges
 For each pending item whose thread now has a reply from the author:
@@ -62,9 +72,10 @@ d. **Capture**:
      mentions movement (animation/transition/scroll/hover/motion/🎬) OR
      the site is plainly animation-led. Then:
      `node scripts/shot.mjs <url> <id> [--motion]`
-   - File upload → download the file via the connector / its url_private
-     (NEEDS MANIK'S SLACK AUTH — verified in the dry run) into
-     `assets/<id>.<ext>`. type = image or video by extension.
+   - File upload → `node scripts/slack-file.mjs <file.url_private> assets/<id>.<ext>`
+     (uses the bot token; no login needed). type = image or video by mimetype.
+     If a `.mov` came in, convert to web-friendly mp4 with ffmpeg if available:
+     `ffmpeg -y -i <in.mov> -c:v libx264 -pix_fmt yuv420p -movflags +faststart -an assets/<id>.mp4`.
    - id = `YYYY-MM-DD-<slug-from-domain-or-filename>`; if taken, append `-2`.
    - Open the captured still with the Read tool. Blank/cookie-walled/broken?
      Retry once; if still bad, keep the entry but note it and tell Manik in
