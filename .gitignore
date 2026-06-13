@@ -7,3 +7,4 @@ assets/.tmp-video/
 .dev.vars
 worker/.dev.vars
 worker/.wrangler/
+.claude/settings.local.json

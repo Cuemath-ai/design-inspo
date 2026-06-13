@@ -1,0 +1,22 @@
+{
+  "id": "2026-06-13-behance",
+  "type": "site",
+  "url": "https://www.behance.net/gallery/171088477/40-abstract-shapes-for-customizing-design",
+  "title": "40 Abstract Shapes",
+  "description": "Math grids and shapes",
+  "notes": [],
+  "addedBy": "Manik",
+  "date": "2026-06-13",
+  "updated": "2026-06-13",
+  "loves": 0,
+  "slack_ts": "1781355120.325579",
+  "tags": {
+    "style": ["geometric", "abstract", "line-art", "grid", "blueprint"],
+    "mood": ["precise", "technical", "mathy", "minimal"],
+    "colour": ["black-and-white", "monochrome", "high-contrast"],
+    "component": ["shapes", "grid", "brand-graphics", "illustration"],
+    "medium": ["graphics", "asset-pack"],
+    "industry": ["design-resources"]
+  },
+  "asset": "assets/2026-06-13-behance.png"
+}
