@@ -237,8 +237,12 @@ Scripts read the bot token from `$SLACK_BOT_TOKEN` if set, else `.slack-bot-toke
   `.slack-bot-token` (local) and the Worker secret (`wrangler secret put
   SLACK_BOT_TOKEN`).
 - **Tidy the bot's own channel messages:** `node scripts/clean-bot-messages.mjs`.
-- **Edit an entry from Slack:** reply on its thread with `retag: a, b`,
-  `edit: new text`. (`remove` is flagged for manual deletion — not automated.)
+- **Edit an entry from Slack:** reply on its thread in plain language — "add
+  the tag dark", "change the description to…", "update the link to…", "make this
+  its own entry", "remove this". The sweep reads the intent (no rigid syntax;
+  the old `retag:`/`edit:`/`remove` prefixes still work). Ambiguous replies get
+  a Po-voiced clarifying question instead of a guess; applied changes get a
+  Po-voiced confirmation. Removal uses `scripts/remove-entry.mjs <id>`.
 - **Run the sweep manually:** "Run now" on the `inspo-sweep` task, or follow
   `SWEEP.md` using the absolute-path scripts.
 
