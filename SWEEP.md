@@ -1,152 +1,96 @@
-# SWEEP.md — daily Inspo sweep procedure
+# SWEEP.md — Inspo sweep procedure (silent / pre-approved)
 
-You are running the Inspo sweep in the design-inspo repo. Work through ALL
-steps. Judgment calls (tags, descriptions, motion-worthiness) are yours;
-everything mechanical uses the scripts. Never invent entries; every entry
-traces to a Slack message.
+You are running the Inspo sweep. It must run **without triggering any permission
+prompt**, so it is built around a fixed set of pre-approved commands.
 
-## 0. Setup
-- `git pull` first.
-- Read `state.json` → `last_swept_at` (null = first run: process entire
-  channel history), `pending` (nudged messages awaiting a description),
-  `channel_id` (already cached: `C0BA05V4C7M`).
+## ⛔ The only shell commands you may run
 
-**This sweep is fully headless — it uses the bot token for everything and needs
-no interactive Slack login, so it runs identically on a Mac or in Claude cloud.**
+Run these by their **absolute path**, exactly as written. **Never** run `git`,
+`cd`, `npm`, `grep`, `cat`, `ls`, `sed`, `node -e`, or any other shell command —
+those will prompt and break the silent run. To look inside a file, use the
+**Read** tool. To write an entry or edit state, use the **Write/Edit** tools.
 
-- **Read** the channel (messages + threads + reactions + file info):
-  `node scripts/slack-read.mjs <channel_id> <last_swept_at>` → prints JSON.
-  (Pass `0` as the timestamp for a full first-run history pull.)
-- **Post / react** (every reply, nudge, confirmation, digest — all appear as
-  the Inspo bot, never a person):
-  `node scripts/bot.mjs post <channel_id> "<text>" [thread_ts]`
-  `node scripts/bot.mjs react <channel_id> <message_ts> <emoji>` (e.g. `white_check_mark`)
-- **Download an uploaded file:**
-  `node scripts/slack-file.mjs <url_private> assets/<id>.<ext>`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/git-sync.mjs pull`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/slack-read.mjs C0BA05V4C7M <last_swept_at>`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/shot.mjs <url> <id> [--motion]`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/slack-file.mjs <url_private> assets/<id>.<ext>`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/bot.mjs post C0BA05V4C7M "<text>" [thread_ts]`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/bot.mjs react C0BA05V4C7M <ts> white_check_mark`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/build-index.mjs`
+- `node /Users/manikbansal/Desktop/design-inspo/scripts/git-sync.mjs publish "<commit message>"`
 
-Do NOT use the Slack connector / MCP tools anywhere in the sweep — the cloud
-runner won't have them.
+All scripts resolve their own paths, so the working directory does not matter.
 
-## 1. Collect
-- Run `node scripts/slack-read.mjs <channel_id> <last_swept_at>` and parse the
-  JSON. Each item has ts, user, bot_id, subtype, text, thread_ts, reactions,
-  files (with url_private), and (if any) replies. This is your whole input.
-- Pending threads are already included (the reader returns each message's
-  replies), so you can resolve nudges from the same JSON.
+## 0. Pull + state
+1. Run `git-sync.mjs pull`.
+2. **Read** `data/.../state.json` (path: `/Users/manikbansal/Desktop/design-inspo/state.json`)
+   → `last_swept_at`, `pending`, `channel_id` (C0BA05V4C7M), `last_digest_date`.
 
-## 2. Pending nudges
-For each pending item whose thread now has a reply from the author:
-treat the reply as the description and process the original message via
-step 3. Remove from `pending`. If still no reply: leave it (ONE nudge ever —
-never re-nudge).
+## 1. Read the channel
+Run `slack-read.mjs C0BA05V4C7M <last_swept_at>` and parse the JSON. Each item:
+`ts, user, userName, bot_id, subtype, text, thread_ts, reactions, files[], replies[]`.
+`userName` is the author's first name (null if the bot lacks users:read — then
+use "team" and flag it in the summary). Pending threads come back as `replies`.
 
-## 3. Process each new top-level message
-Skip anything from the **Inspo bot itself** (its own confirmations, nudges,
-digest — they carry a `bot_id` or come from the Inspo bot user; never
-re-process them), the pinned rules message, channel-join notices, and plain
-conversation (a message with no link and no file attachment is conversation
-— ignore it).
+## 2. Process each new top-level message
+Skip messages from the Inspo bot (`bot_id` set), the pinned rules message,
+join notices, and plain conversation (no link and no file = conversation).
 
-a. **Extract**: first URL in the text, file attachments, remaining text =
-   the description candidate. Author display name via the connector.
-b. **No description?** (bare link/file, or text adds nothing): the instant
-   Worker usually nudges within a second, so FIRST check the thread — if the
-   Inspo bot has already nudged there, just add to `pending` (do NOT nudge
-   again). Only if no bot nudge exists yet, nudge in thread via the bot —
-   `node scripts/bot.mjs post <channel_id> "What caught your eye? One line and it's in." <message_ts>`
-   then add to `pending` with the message ts. Either way, STOP processing
-   this message.
-c. **Duplicate?** Normalize the URL (lowercase host, strip trailing slash,
-   query params, and fragment) and compare against the `url` of every file
-   in data/entries/. If it exists: append {by, note: their description,
-   date} to that entry's `notes[]`, bump `updated`, reply in thread via the
-   bot — "Already saved by {addedBy} on {date} — added your note to it ✓",
-   and skip to the next message.
-d. **Capture**:
-   - **Upload + URL in the same message** → the upload is the card image
-     (the author cropped what matters — never replace it with an auto
-     screenshot) and the URL is stored as the entry's `url` (the Visit
-     link). type = site. Capture motion of the URL only if the description
-     flags movement.
-   - URL → decide motion-worthiness: capture motion when the description
-     mentions movement (animation/transition/scroll/hover/motion/🎬) OR
-     the site is plainly animation-led. Then:
-     `node scripts/shot.mjs <url> <id> [--motion]`
-   - File upload → `node scripts/slack-file.mjs <file.url_private> assets/<id>.<ext>`
-     (uses the bot token; no login needed). type = image or video by mimetype.
-     If a `.mov` came in, convert to web-friendly mp4 with ffmpeg if available:
-     `ffmpeg -y -i <in.mov> -c:v libx264 -pix_fmt yuv420p -movflags +faststart -an assets/<id>.mp4`.
-   - id = `YYYY-MM-DD-<slug-from-domain-or-filename>`; if taken, append `-2`.
-   - Open the captured still with the Read tool. Blank/cookie-walled/broken?
-     Retry once; if still bad, keep the entry but note it and tell Manik in
-     the final report.
-e. **Tag**: 5–12 lowercase-kebab-case tags across style, mood, colour,
-   component, medium, industry. Be generous and concrete — tags power
-   search. Reuse existing vocabulary where it fits (check a few recent
-   entries); new tags are fine when warranted. If you coin a tag that has
-   an obvious synonym cluster, add it to synonyms.json.
-f. **Write** `data/entries/<id>.json` per the README schema. `title` =
-   site/product name. `description` = the author's words (light cleanup
-   only — it stays THEIR voice). `addedBy` = author first name. Include
-   `slack_ts` = the source message ts (used for edit-command lookups).
-g. **Confirm in thread** via the bot:
-   `node scripts/bot.mjs post <channel_id> "Added ✓ — tagged: {4–6 best tags} → https://cuemath-ai.github.io/design-inspo/" <message_ts>`
+- **No description** (link/file but text adds nothing): the instant Worker has
+  usually already nudged in-thread. If `replies` shows no bot nudge yet, run
+  `bot.mjs post … "What caught your eye? One line and it's in." <ts>`. Add the
+  ts to `pending`. Skip.
+- **Duplicate URL** (normalise: lowercase host, drop trailing slash/query/hash;
+  compare to the `url` of existing entries — find them by **Read**ing the files
+  listed by `build-index`'s inputs, i.e. the JSONs in `data/entries/`): append
+  `{by: userName, note: their text, date}` to that entry's `notes[]` (Edit it),
+  bump `updated`, then `bot.mjs post … "Already saved by {addedBy} on {date} —
+  added your note ✓" <ts>`. Skip.
+- **New inspiration**: pick `id` = `YYYY-MM-DD-<slug>`. Capture:
+  - link → `shot.mjs <url> <id>` (add `--motion` if the text mentions
+    movement/animation/scroll/hover/🎬, or the site is clearly motion-led).
+  - file upload → `slack-file.mjs <file.url_private> assets/<id>.<ext>` (ext from
+    mimetype). If a message has BOTH a file and a link, the file is the card and
+    the link is the entry `url`.
+  - Open the captured `assets/<id>.png` with **Read** to confirm it isn't blank.
 
-## 4. Edit commands
-Read the threads of existing entries that received new replies; match
-entry by `slack_ts`:
-- `retag: a, b, c` → merge those tags in (replace a dimension only if they
-  prefix it like `mood: x, y`).
-- `edit: <text>` → replace description with <text>.
-- `remove` → delete the entry JSON and its assets.
-Confirm each applied command via the bot — react ✅
-(`node scripts/bot.mjs react <channel_id> <reply_ts> white_check_mark`) or a
-short `bot.mjs post` reply.
+## 3. Write the entry
+**Write** `/Users/manikbansal/Desktop/design-inspo/data/entries/<id>.json` with:
+`id, type(site|image|video), url, title, description (their words, lightly
+cleaned), notes:[], addedBy: userName, date, updated, loves:0, slack_ts:<ts>,
+asset:"assets/<id>.png", motion?:"assets/<id>.webm", tags:{style[],mood[],
+colour[],component[],medium[],industry[]}` — 5–12 generous, concrete,
+lowercase-kebab tags across the six dimensions. Reuse existing tag words where
+they fit (Read a couple of recent entries).
+Then `bot.mjs post … "Added ✓ — tagged: {4–6 tags} → https://cuemath-ai.github.io/design-inspo/" <ts>`.
+
+## 4. Edit commands (thread replies on existing entries, matched by `slack_ts`)
+- `retag: a, b, c` → merge those tags into the entry (Edit the entry JSON).
+- `edit: <text>` → replace the entry's description (Edit the entry JSON).
+- `remove` → deletion needs a shell `rm` (not pre-approved), so don't automate
+  it. Note "remove requested for <id>" in the final summary for manual action.
+Confirm applied retag/edit with `bot.mjs react … white_check_mark`.
 
 ## 5. Loves
-For every entry whose `date` is within the last 30 days, re-read its
-original message's reactions; `loves` = total reaction count across all
-emoji. Update changed entries (bump nothing else).
+For entries dated within 30 days, set `loves` = total reaction count from the
+`reactions` of their source message (already in the slack-read output). Edit
+changed entries only.
 
 ## 6. Publish
-- `npm run build`
-- Update state.json: `last_swept_at` = newest processed message ts,
-  current `pending` list.
-- `git add -A && git commit -m "sweep: <N> added, <M> updated" && git push`
+1. Run `build-index.mjs`.
+2. **Edit** state.json: `last_swept_at` = newest processed ts; updated `pending`.
+3. Run `git-sync.mjs publish "sweep: <N> added, <M> updated"`.
 
-## 7. Weekly digest (Mondays, in Po's voice — primary; Worker is the backstop)
-The Cloudflare Worker will post a template digest at 5 PM IST Monday IF no
-digest has gone out. This sweep is the PRIMARY, freshly-written path — aim to
-beat the Worker so the team gets real AI-written Po, not a template.
+## 7. Weekly digest (Mondays, Po's voice — primary; Worker backstops at 5 PM)
+Post ONLY if: today is **Monday**, local time **10:00–16:59**, and no digest has
+gone out today. Check the latter from the slack-read output — any bot message
+today containing **🧲** means it's done; then SKIP. Otherwise compose a fresh,
+short Po (Kung Fu Panda) digest — warm, goofy, dumpling/kung-fu flourishes,
+state how many entries were added in the last 7 days, name the most-loved find,
+include the gallery link — **starting with 🧲** (the shared marker that stops the
+5 PM Worker double-posting). Post it with `bot.mjs post C0BA05V4C7M "<text>"`
+(no thread_ts). After posting, **Edit** state.json `last_digest_date` to today.
 
-Post the digest ONLY if ALL of these hold:
-- today is **Monday**, and
-- local time is between **10:00 and 16:59** (leave 17:00 to the Worker), and
-- **no digest has been posted yet this Monday.** Check this by running
-  `node scripts/slack-read.mjs <channel_id> <today-00:00 ts>` and looking for
-  any bot message whose text contains **🧲** (every digest, sweep or Worker,
-  carries that magnet). If one exists, the digest is already out — SKIP.
-
-When posting, the message MUST start with **🧲** (this is the shared marker that
-stops the Worker double-posting). Send via the bot to the channel (not a
-thread): `node scripts/bot.mjs post <channel_id> "<message>"`.
-
-Count N = entries added in the last 7 days.
-
-**Voice — the bot's personality is Po from Kung Fu Panda:** warm, goofy,
-humble, big-hearted; food metaphors (dumplings, noodles); the occasional
-kung-fu flourish ("Skadoosh!", "There is no charge for awesomeness"). Keep it
-SHORT — 2 to 4 lines. Genuinely encouraging, never cringe or bloated. Each
-week: state N, optionally name the most-loved find of the week, include the
-gallery link (https://cuemath-ai.github.io/design-inspo/), and rally the team
-to add more. If N is 0, post a gentle "quiet week, let's change that" version
-rather than skipping. Vary the wording every week — never copy these verbatim
-(note the leading 🧲):
-
-- "🧲 Whoaa — 7 new inspirations this week! That's a full plate of dumplings for the eyes 🥟 The crew loved *{title}* most. Now... what beauty will YOU drop this week? There is no charge for awesomeness. Skadoosh 🐼 → {link}"
-- "🧲 Only 1 new find this week — but even one dumpling can start a feast, yeah? 🐼 Let's fill the board, team. Drop what's inspiring you → {link}"
-
-## 8. Report
-End with a one-paragraph summary for Manik: added/merged/nudged/edited
-counts, anything that failed (bad screenshots, undownloadable files,
-dead links), and any synonyms.json additions.
+## 8. Summary
+End with one line: added / merged / nudged / edited / digest counts, plus
+anything that failed or any author you had to attribute to "team".

@@ -24,6 +24,22 @@ async function api(method, params) {
   return r.json();
 }
 
+// Resolve a Slack user id to a first name (needs the users:read scope). Cached.
+// Falls back to null if the scope is missing, so the sweep degrades gracefully.
+const nameCache = new Map();
+async function firstName(userId) {
+  if (!userId) return null;
+  if (nameCache.has(userId)) return nameCache.get(userId);
+  const r = await api('users.info', { user: userId });
+  let name = null;
+  if (r.ok) {
+    const p = r.user?.profile || {};
+    name = (p.first_name || p.display_name || r.user?.real_name || r.user?.name || '').split(' ')[0] || null;
+  }
+  nameCache.set(userId, name);
+  return name;
+}
+
 const out = [];
 let cursor;
 do {
@@ -33,6 +49,7 @@ do {
     const msg = {
       ts: m.ts,
       user: m.user,
+      userName: await firstName(m.user),
       bot_id: m.bot_id,
       subtype: m.subtype,
       text: m.text || '',

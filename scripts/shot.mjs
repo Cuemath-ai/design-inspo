@@ -1,7 +1,13 @@
 // usage: node scripts/shot.mjs <url> <id> [--motion]
 // writes assets/<id>.png always; assets/<id>.webm if --motion
+// Paths resolve relative to this script, so it works from ANY working directory
+// (the scheduled sweep never needs to `cd` into the repo).
 import { chromium } from 'playwright';
 import { rename, rm } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+const assets = fileURLToPath(new URL('../assets/', import.meta.url));
+const tmpDir = `${assets}.tmp-video`;
 
 const [url, id] = process.argv.slice(2);
 const motion = process.argv.includes('--motion');
@@ -9,18 +15,16 @@ if (!url || !id) { console.error('usage: shot.mjs <url> <id> [--motion]'); proce
 
 const browser = await chromium.launch();
 try {
-  // still: full-page screenshot at desktop width
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
   await page.waitForTimeout(2500); // let entrance animations settle
-  await page.screenshot({ path: `assets/${id}.png`, fullPage: true });
+  await page.screenshot({ path: `${assets}${id}.png`, fullPage: true });
   await page.close();
 
   if (motion) {
-    // ~6s clip: load, dwell, then smooth-scroll through the first few viewports
     const ctx = await browser.newContext({
       viewport: { width: 1280, height: 800 },
-      recordVideo: { dir: 'assets/.tmp-video', size: { width: 1280, height: 800 } }
+      recordVideo: { dir: tmpDir, size: { width: 1280, height: 800 } }
     });
     const mp = await ctx.newPage();
     await mp.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => {});
@@ -35,8 +39,8 @@ try {
     const video = mp.video();
     await ctx.close();                       // finalizes the recording
     const tmp = await video.path();
-    await rename(tmp, `assets/${id}.webm`);
-    await rm('assets/.tmp-video', { recursive: true, force: true });
+    await rename(tmp, `${assets}${id}.webm`);
+    await rm(tmpDir, { recursive: true, force: true });
   }
 } finally { await browser.close(); }
 console.log(`captured ${id}${motion ? ' (+motion)' : ''}`);
