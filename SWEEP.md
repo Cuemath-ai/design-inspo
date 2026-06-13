@@ -64,8 +64,19 @@ join notices, and plain conversation (no link and no file = conversation).
     `ffmpeg -y -ss 1 -i assets/<id>.mp4 -vframes 1 assets/<id>.png -loglevel error`.
     Do NOT auto-screenshot the link in this case. If the message also has a link,
     it's the entry `url`.
-  - link only → `shot.mjs <url> <id>` (see above).
-  - Open the captured `assets/<id>.png` with **Read** to confirm it isn't blank.
+  - link only → take the BEST screenshot that matches the description:
+    - default: `shot.mjs <url> <id>` captures the hero (top viewport) — clean and
+      representative for most.
+    - if the description points at a specific part ("footer", "pricing", "the
+      bottom", a named section) → `shot.mjs <url> <id> --find "<that word>"`
+      (scrolls that element into view) or `--scroll <0..1>`.
+    - if it's about the whole layout / a one-screen page → add `--full`.
+    - add `--motion` if movement is the point.
+    Aim to show what the user actually pointed at.
+  - **Rule: if an image or video is shared, that file IS the thumbnail** (for a
+    video, a frame of it) — NEVER replace a shared image/video with a screenshot.
+  - Open the captured `assets/<id>.png` with **Read** to confirm it isn't blank
+    and that it reflects the description; re-shoot with a different target if not.
 
 ## 3. Write the entry
 **Write** `/Users/manikbansal/Desktop/design-inspo/data/entries/<id>.json` with:
