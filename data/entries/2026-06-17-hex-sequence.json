@@ -1,0 +1,22 @@
+{
+  "id": "2026-06-17-hex-sequence",
+  "type": "site",
+  "url": "https://www.hex.inc/work/sequence",
+  "title": "Hex — Sequence",
+  "description": "Grid style illustrations",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-06-17",
+  "updated": "2026-06-17",
+  "loves": 2,
+  "slack_ts": "1781598005.059999",
+  "tags": {
+    "style": ["editorial", "geometric", "gradient"],
+    "mood": ["calm", "premium", "considered"],
+    "colour": ["pastel", "purple", "iridescent", "soft-neutral"],
+    "component": ["illustration", "grid", "case-study", "brand-graphics"],
+    "medium": ["website"],
+    "industry": ["ai", "data-tools"]
+  },
+  "asset": "assets/2026-06-17-hex-sequence.png"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "2026-06-17-fauna-robotics",
+  "type": "image",
+  "url": "https://faunarobotics.com/",
+  "title": "Fauna Robotics",
+  "description": "Pastel colours combination",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-06-17",
+  "updated": "2026-06-17",
+  "loves": 0,
+  "slack_ts": "1781618201.582999",
+  "tags": {
+    "style": ["geometric", "playful", "shape-language", "brand-graphics"],
+    "mood": ["warm", "friendly", "optimistic"],
+    "colour": ["pastel", "cream", "mustard", "terracotta", "sage", "dusty-blue"],
+    "component": ["illustration", "category-grid", "brand-system"],
+    "medium": ["brand", "website"],
+    "industry": ["robotics", "ai"]
+  },
+  "asset": "assets/2026-06-17-fauna-robotics.png"
+}
