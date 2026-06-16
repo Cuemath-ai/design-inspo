@@ -102,16 +102,27 @@ Local testing reads secrets from `worker/.dev.vars` (gitignored).
 
 ---
 
-## 4. The sweep (scheduled task on Manik's Mac)
+## 4. The sweep (launchd background job on Manik's Mac)
 
-**Task:** `inspo-sweep` (Claude Code scheduled task). Cron `7 12,20 * * *` local
-= **~12:13 PM and ~8:13 PM IST**. Procedure: `SWEEP.md`.
+Runs via **macOS launchd**, the same way Design Daily does — NOT the in-app
+scheduler (that one is disabled). This means it runs **unattended in the
+background: no Claude app open, no permission prompts.**
 
-**Runs on the Mac, only while the Claude app is open.** If the app is closed at
-the scheduled time, the run fires on the next launch (catch-up, not skipped).
-The sweep is idempotent — driven by `state.json.last_swept_at`, so a catch-up
-run processes everything new at once. The Worker handles time-sensitive nudges,
-so the only effect of the Mac being off is the gallery refreshing later.
+- **LaunchAgent:** `~/Library/LaunchAgents/com.manikbansal.inspo-sweep.plist`
+  → runs `/bin/bash <repo>/.curator/run.sh` at **12:07 and 20:07** local.
+- **`.curator/run.sh`** (gitignored — machine-specific) sets PATH/HOME, then runs
+  the headless Claude CLI: `claude -p "$(cat .curator/prompt.md)"
+  --dangerously-skip-permissions --output-format text`. That flag = "trusted
+  automation in this folder, don't stop to ask" — so it never prompts. It uses
+  Manik's normal Claude login (no API key, no extra cost). Logs to `.curator/run.log`.
+- **`.curator/prompt.md`** tells it to follow `SWEEP.md`.
+- Manage it: `launchctl unload/load -w ~/Library/LaunchAgents/com.manikbansal.inspo-sweep.plist`.
+  Re-create the runner/plist on a new machine (they're gitignored) — see this section.
+
+Still needs the **Mac powered on** at the scheduled time (launchd runs missed
+jobs on next wake). The Worker handles time-sensitive nudges 24/7, so the only
+effect of the Mac being off is the gallery refreshing later. The sweep is
+idempotent — `state.json.last_swept_at` means a late run catches up on everything.
 
 **What a run does** (see `SWEEP.md` for the exact steps): pull, read new channel
 messages, for each new post → screenshot (or download an upload), choose tags,
@@ -121,10 +132,12 @@ write the entry JSON, confirm in-thread as Po; refresh love counts; rebuild
 
 ### Why the sweep is built the way it is (IMPORTANT for edits)
 
-The sweep runs **unattended**, so it must trigger **zero permission prompts**.
-Claude refuses to auto-approve some shell patterns — notably any **`cd … && …`
-compound command** (it warns about untrusted hooks / path bypass) and these can
-only be "Allow once", never persisted. So the sweep is designed to avoid them:
+The launchd runner uses `--dangerously-skip-permissions`, so prompts aren't an
+issue today. But the sweep is still built from clean, pre-approved, absolute-path
+`node` scripts (no raw `git`/`cd`/`grep`) — it keeps the design tidy and means it
+also runs prompt-free under the in-app scheduler if that's ever used as a
+fallback. (Background: Claude refuses to auto-approve `cd … && …` compound
+commands, so the scripts avoid them.) The design:
 
 - **Every action is a pre-approved, absolute-path `node` script.** No raw `git`,
   no `cd`, no `grep`/`cat`/`ls`/`sed`. To read a file the run uses the Read
