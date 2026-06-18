@@ -1,0 +1,23 @@
+{
+  "id": "2026-06-18-fruitful",
+  "type": "site",
+  "url": "https://www.fruitful.com/",
+  "title": "Fruitful",
+  "description": "Interactions and motion.",
+  "notes": [],
+  "addedBy": "Khushbu",
+  "date": "2026-06-18",
+  "updated": "2026-06-18",
+  "loves": 0,
+  "slack_ts": "1781683699.414189",
+  "tags": {
+    "style": ["editorial", "minimal", "typographic", "clean"],
+    "mood": ["calm", "trustworthy", "optimistic"],
+    "colour": ["white", "green", "cream"],
+    "component": ["hero", "video", "navigation", "cta"],
+    "medium": ["website", "motion"],
+    "industry": ["fintech", "personal-finance"]
+  },
+  "asset": "assets/2026-06-18-fruitful.png",
+  "motion": "assets/2026-06-18-fruitful.webm"
+}

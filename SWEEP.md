@@ -15,20 +15,20 @@ Run these by their **absolute path**, exactly as written. **Never** run `git`,
 those will prompt and break the silent run. To look inside a file, use the
 **Read** tool. To write an entry or edit state, use the **Write/Edit** tools.
 
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/git-sync.mjs pull`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/slack-read.mjs C0BA05V4C7M <last_swept_at>`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/shot.mjs <url> <id> [--motion]`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/slack-file.mjs <url_private> assets/<id>.<ext>`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/bot.mjs post C0BA05V4C7M "<text>" [thread_ts]`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/bot.mjs react C0BA05V4C7M <ts> white_check_mark`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/build-index.mjs`
-- `node /Users/manikbansal/Desktop/design-inspo/scripts/git-sync.mjs publish "<commit message>"`
+- `node /Users/manikbansal/design-inspo/scripts/git-sync.mjs pull`
+- `node /Users/manikbansal/design-inspo/scripts/slack-read.mjs C0BA05V4C7M <last_swept_at>`
+- `node /Users/manikbansal/design-inspo/scripts/shot.mjs <url> <id> [--motion]`
+- `node /Users/manikbansal/design-inspo/scripts/slack-file.mjs <url_private> assets/<id>.<ext>`
+- `node /Users/manikbansal/design-inspo/scripts/bot.mjs post C0BA05V4C7M "<text>" [thread_ts]`
+- `node /Users/manikbansal/design-inspo/scripts/bot.mjs react C0BA05V4C7M <ts> white_check_mark`
+- `node /Users/manikbansal/design-inspo/scripts/build-index.mjs`
+- `node /Users/manikbansal/design-inspo/scripts/git-sync.mjs publish "<commit message>"`
 
 All scripts resolve their own paths, so the working directory does not matter.
 
 ## 0. Pull + state
 1. Run `git-sync.mjs pull`.
-2. **Read** `data/.../state.json` (path: `/Users/manikbansal/Desktop/design-inspo/state.json`)
+2. **Read** `data/.../state.json` (path: `/Users/manikbansal/design-inspo/state.json`)
    → `last_swept_at`, `pending`, `channel_id` (C0BA05V4C7M), `last_digest_date`.
 
 ## 1. Read the channel
@@ -79,7 +79,7 @@ join notices, and plain conversation (no link and no file = conversation).
     and that it reflects the description; re-shoot with a different target if not.
 
 ## 3. Write the entry
-**Write** `/Users/manikbansal/Desktop/design-inspo/data/entries/<id>.json` with:
+**Write** `/Users/manikbansal/design-inspo/data/entries/<id>.json` with:
 `id, type(site|image|video), url, title, description (their words, lightly
 cleaned), notes:[], addedBy: userName, date, updated, loves:0, slack_ts:<ts>,
 asset:"assets/<id>.png", motion?:"assets/<id>.webm", tags:{style[],mood[],
@@ -102,7 +102,7 @@ syntax. Read each new reply and decide what they mean, then act:
 - **Make it a separate entry** ("add this as its own entry") → create a new
   entry per §2–§3 using the reply's link/intent.
 - **Remove it** ("delete this", "remove this one") → run
-  `node /Users/manikbansal/Desktop/design-inspo/scripts/remove-entry.mjs <id>`.
+  `node /Users/manikbansal/design-inspo/scripts/remove-entry.mjs <id>`.
 - **Just more commentary / praise / a second perspective** → append it to the
   entry's `notes[]` (Edit the JSON).
 - **Genuinely ambiguous** (can't tell if it's an instruction or a comment, or a
