@@ -6,6 +6,7 @@ tags them, screenshots them, and publishes a searchable visual gallery.
 
 **Gallery:** https://cuemath-ai.github.io/design-inspo/
 **Repo:** `Cuemath-ai/design-inspo` (public)
+**Local path:** `~/design-inspo` (deliberately NOT inside `~/Desktop` — see §4)
 **Slack channel:** `#design-inspo` — id `C0BA05V4C7M` (workspace: cuemath)
 
 > No secrets live in this repo. Tokens are in gitignored local files and in
@@ -118,6 +119,10 @@ background: no Claude app open, no permission prompts.**
 - **`.curator/prompt.md`** tells it to follow `SWEEP.md`.
 - Manage it: `launchctl unload/load -w ~/Library/LaunchAgents/com.manikbansal.inspo-sweep.plist`.
   Re-create the runner/plist on a new machine (they're gitignored) — see this section.
+- **⚠️ Location matters:** the repo must live OUTSIDE macOS's protected folders
+  (`~/Desktop`, `~/Documents`, `~/Downloads`). launchd can't run scripts there →
+  "Operation not permitted". That's why it sits at `~/design-inspo`, like Design
+  Daily. If you ever move it, keep it in the home root.
 
 Still needs the **Mac powered on** at the scheduled time (launchd runs missed
 jobs on next wake). The Worker handles time-sensitive nudges 24/7, so the only
@@ -167,6 +172,11 @@ Static, no framework. Served from the repo root of `main`.
   `scoreEntry`); unit-tested.
 - `synonyms.json` — the synonym map that makes "moody"/"playful" etc. match
   related tags. Extend this to improve search.
+- **Thumbnails:** a shared image is the card as-is; a shared video becomes the
+  motion clip AND a frame of it is the still; a link-only post gets the best
+  screenshot the sweep can take (`scripts/shot.mjs` — clean hero by default,
+  `--find "<text>"`/`--scroll` to capture the part the description names, `--full`
+  for whole-page, `--motion` for a clip; it also dismisses cookie pop-ups).
 - **Likes:** each card and the detail view have a heart. Clicking it calls the
   Worker's `/love` endpoint (§3) and toggles your like. The displayed love count
   = Slack reactions (from `index.json`, synced by the sweep) **plus** gallery
@@ -192,14 +202,15 @@ index.json                                   BUILD ARTIFACT (compiled entries, n
 data/entries/<id>.json                       one entry per inspiration (source of truth)
 assets/<id>.png|.webm|.mp4|…                 screenshots, motion clips, uploads
 state.json                                   sweep cursor: last_swept_at, pending[], channel_id, last_digest_date
-SWEEP.md                                     the sweep procedure (executed by the scheduled task)
+SWEEP.md                                     the sweep procedure (executed by the launchd sweep)
 scripts/
   git-sync.mjs        git pull / publish via `git -C` (no cd)
   slack-read.mjs      read channel+threads+reactions+files, resolve author names
   slack-file.mjs      download a Slack upload via the bot token
-  shot.mjs            headless screenshot (+ optional ~6s motion clip)
+  shot.mjs            headless screenshot — hero by default; --find/--scroll/--full/--motion
   bot.mjs             post / react as the Inspo bot
   build-index.mjs     data/entries/* → index.json
+  remove-entry.mjs    delete an entry's JSON + assets ("remove" thread replies)
   clean-bot-messages.mjs   one-off: delete the bot's own channel messages
 worker/
   src/index.js        the Cloudflare Worker (instant nudge + digest backstop)
@@ -210,6 +221,7 @@ GITIGNORED (local only — never committed):
   .slack-signing-secret   Slack signing secret (for local Worker tests)
   .dev.vars               worker/.dev.vars — secrets for `wrangler dev`
   .claude/settings.local.json   permission allow-list + allowed directory
+  .curator/             launchd runner: run.sh + prompt.md + logs (machine-specific)
   .browser-profile/, .slack-auth.json   obsolete (old browser-download approach)
 ```
 
@@ -239,9 +251,10 @@ Scripts read the bot token from `$SLACK_BOT_TOKEN` if set, else `.slack-bot-toke
 
 ## 7. Common tasks
 
-- **Change sweep frequency:** update the `inspo-sweep` scheduled task's cron
-  (currently `7 12,20 * * *`). Keep one slot inside Mon 10:00–16:59 so the Mac
-  posts the fresh digest before the 5 PM Worker backstop.
+- **Change sweep frequency:** edit `StartCalendarInterval` in
+  `~/Library/LaunchAgents/com.manikbansal.inspo-sweep.plist` (currently 12:07 &
+  20:07), then `launchctl unload` + `launchctl load -w` it. Keep one slot inside
+  Mon 10:00–16:59 so the Mac posts the fresh digest before the 5 PM Worker backstop.
 - **Change the digest day/time:** Mac side = the window in `SWEEP.md` §7; cloud
   backstop = the cron in `worker/wrangler.toml` (UTC) — redeploy after editing.
 - **Improve search:** add clusters to `synonyms.json` (lowercase, list each
@@ -256,8 +269,8 @@ Scripts read the bot token from `$SLACK_BOT_TOKEN` if set, else `.slack-bot-toke
   the old `retag:`/`edit:`/`remove` prefixes still work). Ambiguous replies get
   a Po-voiced clarifying question instead of a guess; applied changes get a
   Po-voiced confirmation. Removal uses `scripts/remove-entry.mjs <id>`.
-- **Run the sweep manually:** "Run now" on the `inspo-sweep` task, or follow
-  `SWEEP.md` using the absolute-path scripts.
+- **Run the sweep manually:** `launchctl kickstart -k gui/$(id -u)/com.manikbansal.inspo-sweep`
+  (or `bash ~/design-inspo/.curator/run.sh`). Watch `.curator/run.log`.
 
 ---
 
@@ -276,6 +289,8 @@ Scripts read the bot token from `$SLACK_BOT_TOKEN` if set, else `.slack-bot-toke
   internal/confidential."
 - **Sweep depends on the Mac being on** (see §4). Cloud-hosting the heavy sweep
   would need a paid AI key (deliberately not done).
+- **Never put the repo in `~/Desktop`/`~/Documents`/`~/Downloads`** — launchd can't
+  run scripts in those macOS-protected folders ("Operation not permitted"). Home root only.
 - **Permission prompts returning** → see §4's "why it's built this way": a new
   command needs an absolute-path allow-list entry; never introduce `cd`/raw git.
 
@@ -286,3 +301,9 @@ Scripts read the bot token from `$SLACK_BOT_TOKEN` if set, else `.slack-bot-toke
 Built 2026-06. Designed around three constraints: no paid API keys for the core
 loop, frictionless capture (just post in Slack), and a genuinely nice browsing
 experience for designers. The bot's personality is Po from Kung Fu Panda.
+
+**Changes since launch:** gallery likes (Worker + KV); plain-language thread
+edits with Po-voiced confirmations; smarter thumbnails (shared media wins,
+link shots match the description); the sweep moved from the in-app scheduler to a
+**launchd** background job and the repo relocated from `~/Desktop` to
+`~/design-inspo` (2026-06-18) so macOS folder protection doesn't block it.
