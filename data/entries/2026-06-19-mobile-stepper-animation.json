@@ -1,0 +1,23 @@
+{
+  "id": "2026-06-19-mobile-stepper-animation",
+  "type": "video",
+  "url": "https://x.com/zzerou_/status/1812509007648846300",
+  "title": "Mobile stepper animation",
+  "description": "Mobile stepper animation.",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-06-19",
+  "updated": "2026-06-19",
+  "loves": 0,
+  "slack_ts": "1781872708.247899",
+  "tags": {
+    "style": ["minimal", "clean", "playful"],
+    "mood": ["delightful", "tactile", "responsive"],
+    "colour": ["white", "blue", "green"],
+    "component": ["stepper", "progress-indicator", "button", "cta"],
+    "medium": ["mobile", "motion", "interaction"],
+    "industry": ["product-design", "onboarding"]
+  },
+  "asset": "assets/2026-06-19-mobile-stepper-animation.png",
+  "motion": "assets/2026-06-19-mobile-stepper-animation.mp4"
+}
