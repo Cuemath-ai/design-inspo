@@ -1,0 +1,22 @@
+{
+  "id": "2026-06-24-penrose-tiles",
+  "type": "site",
+  "url": "https://misc.0o0o.org/penrose/index.html",
+  "title": "Penrose Tiling Online Generator",
+  "description": "Penrose tiles generator — tweak density, colours and rotation to build aperiodic tiling patterns live.",
+  "notes": [],
+  "addedBy": "Neeraj",
+  "date": "2026-06-24",
+  "updated": "2026-06-24",
+  "loves": 0,
+  "slack_ts": "1782301585.735959",
+  "tags": {
+    "style": ["geometric", "generative", "patterned", "symmetrical"],
+    "mood": ["playful", "hypnotic", "intricate"],
+    "colour": ["pink", "red", "monochrome"],
+    "component": ["pattern", "generator", "tool"],
+    "medium": ["website", "interactive"],
+    "industry": ["creative-coding", "math"]
+  },
+  "asset": "assets/2026-06-24-penrose-tiles.png"
+}
