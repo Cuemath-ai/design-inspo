@@ -1,0 +1,23 @@
+{
+  "id": "2026-08-03-mindmarket",
+  "type": "site",
+  "url": "https://mindmarket.com/",
+  "title": "MindMarket",
+  "description": "Pastel colour palette + smooth animations.",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-08-03",
+  "updated": "2026-08-03",
+  "loves": 0,
+  "slack_ts": "1785777539.934729",
+  "tags": {
+    "style": ["illustrated", "bold", "playful", "clean"],
+    "mood": ["friendly", "energetic", "optimistic"],
+    "colour": ["green", "bright", "multicolour"],
+    "component": ["hero", "navigation", "cta", "illustration"],
+    "medium": ["website", "motion"],
+    "industry": ["research", "b2b"]
+  },
+  "asset": "assets/2026-08-03-mindmarket.png",
+  "motion": "assets/2026-08-03-mindmarket.webm"
+}
