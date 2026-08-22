@@ -1,0 +1,22 @@
+{
+  "id": "2026-08-22-a-lign-studio",
+  "type": "site",
+  "url": "https://www.a-lign.studio/",
+  "title": "A-lign Studio",
+  "description": "Cool Trustpilot section — illustrated carousel with a creative social-proof layout.",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-08-22",
+  "updated": "2026-08-22",
+  "loves": 0,
+  "slack_ts": "1787305988.879739",
+  "tags": {
+    "style": ["illustrated", "playful", "editorial"],
+    "mood": ["friendly", "warm", "trustworthy"],
+    "colour": ["grey", "white", "terracotta"],
+    "component": ["testimonials", "social-proof", "carousel"],
+    "medium": ["website"],
+    "industry": ["design-agency", "branding"]
+  },
+  "asset": "assets/2026-08-22-a-lign-studio.png"
+}

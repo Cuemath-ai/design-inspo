@@ -1,0 +1,22 @@
+{
+  "id": "2026-08-22-aspensearch",
+  "type": "site",
+  "url": "https://www.aspensearch.com/",
+  "title": "Aspen Search",
+  "description": "Unique IA and line illustrations — editorial dark layout with geometric wireframe spheres and structured content navigation.",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-08-22",
+  "updated": "2026-08-22",
+  "loves": 0,
+  "slack_ts": "1787306078.024099",
+  "tags": {
+    "style": ["editorial", "minimal", "dark", "typographic", "illustrated"],
+    "mood": ["sophisticated", "intellectual", "cool"],
+    "colour": ["black", "white", "monochrome"],
+    "component": ["navigation-ia", "section-layout", "illustration"],
+    "medium": ["website"],
+    "industry": ["fintech", "research", "b2b"]
+  },
+  "asset": "assets/2026-08-22-aspensearch.png"
+}

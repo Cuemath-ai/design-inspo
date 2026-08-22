@@ -1,0 +1,22 @@
+{
+  "id": "2026-08-22-manifesto-endel",
+  "type": "site",
+  "url": "https://manifesto.endel.io/",
+  "title": "Endel Manifesto",
+  "description": "Minimal line illustration style.",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-08-22",
+  "updated": "2026-08-22",
+  "loves": 1,
+  "slack_ts": "1787305647.851539",
+  "tags": {
+    "style": ["minimal", "dark", "typographic", "illustrated"],
+    "mood": ["bold", "calm", "sophisticated"],
+    "colour": ["black", "white", "monochrome"],
+    "component": ["hero", "logo", "cta"],
+    "medium": ["website"],
+    "industry": ["music", "wellness", "tech"]
+  },
+  "asset": "assets/2026-08-22-manifesto-endel.png"
+}
