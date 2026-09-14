@@ -1,0 +1,22 @@
+{
+  "id": "2026-09-14-greptile",
+  "type": "site",
+  "url": "https://www.greptile.com/",
+  "title": "Greptile",
+  "description": "Grid and pixels",
+  "notes": [],
+  "addedBy": "Khushbu",
+  "date": "2026-09-14",
+  "updated": "2026-09-14",
+  "loves": 0,
+  "slack_ts": "1789367400.825089",
+  "tags": {
+    "style": ["grid", "minimal", "technical", "dark"],
+    "mood": ["confident", "clean", "focused"],
+    "colour": ["dark", "monochrome", "green-accent"],
+    "component": ["hero", "typography", "layout"],
+    "medium": ["web", "desktop"],
+    "industry": ["developer-tools", "ai", "saas"]
+  },
+  "asset": "assets/2026-09-14-greptile.png"
+}

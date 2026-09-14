@@ -1,0 +1,22 @@
+{
+  "id": "2026-09-14-k95",
+  "type": "site",
+  "url": "https://k95.it/en",
+  "title": "K95 Design Studio",
+  "description": "Cool interactions + product showcase",
+  "notes": [],
+  "addedBy": "Khushbu",
+  "date": "2026-09-14",
+  "updated": "2026-09-14",
+  "loves": 0,
+  "slack_ts": "1789367622.532359",
+  "tags": {
+    "style": ["editorial", "experimental", "bold", "eclectic"],
+    "mood": ["energetic", "vibrant", "dynamic"],
+    "colour": ["electric-blue", "multicolour", "saturated"],
+    "component": ["product-showcase", "hero", "card", "interaction"],
+    "medium": ["interactive", "motion", "web"],
+    "industry": ["brand", "design", "creative"]
+  },
+  "asset": "assets/2026-09-14-k95.png"
+}
