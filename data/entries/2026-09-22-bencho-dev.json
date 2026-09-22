@@ -1,0 +1,22 @@
+{
+  "id": "2026-09-22-bencho-dev",
+  "type": "site",
+  "url": "https://bencho.dev/",
+  "title": "Bencho",
+  "description": "A library of interactive UI blocks you can explore, tweak, and take straight into your projects.",
+  "notes": [],
+  "addedBy": "Aayushmaan",
+  "date": "2026-09-22",
+  "updated": "2026-09-22",
+  "loves": 0,
+  "slack_ts": "1790072417.340359",
+  "tags": {
+    "style": ["minimal", "clean", "card-based", "component-library"],
+    "mood": ["practical", "playful", "approachable"],
+    "colour": ["light", "neutral", "white"],
+    "component": ["cards", "blocks", "interactive", "layout"],
+    "medium": ["web", "desktop"],
+    "industry": ["design-tools", "developer-tools", "ui-kits"]
+  },
+  "asset": "assets/2026-09-22-bencho-dev.png"
+}
